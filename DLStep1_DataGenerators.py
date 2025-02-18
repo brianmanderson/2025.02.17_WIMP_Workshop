@@ -25,8 +25,8 @@ def return_generator(records_path, batch=8):
                                              values=(1/standard_deviation_value,)),
         CProcessors.RandomNoise(wanted_keys=('ct_array',), max_noise=noise),
         CProcessors.Threshold_Images(keys=image_keys,
-                                     lower_bounds=(-5,),
-                                     upper_bounds=(5,),
+                                     lower_bounds=(-300,),
+                                     upper_bounds=(300,),
                                      divides=(False,)),
         CProcessors.ToCategorical(annotation_keys=out_keys, number_of_classes=(2,)),
     ]
@@ -46,7 +46,9 @@ def main():
     for _ in range(len(train_generator)):
         # print(_)
         x, y = next(iterator)
-        k = 1
+        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(x.numpy())), os.path.join('.', 'Data', 'TFRecords', 'Image.nii.gz'))
+        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(y[..., 1].numpy()).astype('float')), os.path.join('.', 'Data', 'TFRecords', 'Mask.nii.gz'))
+        break
 
 
 if __name__ == '__main__':
