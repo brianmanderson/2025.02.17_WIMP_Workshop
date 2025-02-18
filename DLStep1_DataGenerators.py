@@ -28,6 +28,7 @@ def return_generator(records_path, batch=8):
                                      lower_bounds=(-5,),
                                      upper_bounds=(5,),
                                      divides=(False,)),
+        CProcessors.ToCategorical(annotation_keys=out_keys, number_of_classes=(2,)),
     ]
     base_processors += [CProcessors.ReturnOutputs(input_keys=pull_keys, output_keys=out_keys, as_tuple=False),]
     prefetch = 15
