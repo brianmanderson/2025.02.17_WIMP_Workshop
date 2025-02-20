@@ -12,18 +12,27 @@ def return_generator(records_path, batch=8):
                                    shuffle=True,
                                    in_parallel=2, delete_old_cache=True)
     mean_value = -35
-    noise = 0.0
     standard_deviation_value = 60
+    image_shape = (64, 256, 256)
+    out_shape = (32, 128, 128)
     image_keys = ('ct_array',)
     out_keys = ('mask_array',)
     pull_keys = image_keys
     base_processors = [
         CProcessors.ExpandDimension(axis=-1, image_keys=image_keys + out_keys),
+        CProcessors.DefineShape(keys=('ct_array', 'mask_array'), image_shapes=(image_shape + (1,),
+                                                                        image_shape + (1,)))
+    ]
+    base_processors += [
+        CProcessors.Cast_Data(keys=('mask_array', ), dtypes=('float32',)),
+        CProcessors.RandomCrop(keys_to_crop=('ct_array', 'mask_array'),
+                               crop_dimensions=out_shape + (2,),
+                               min_start_stop=None), #
+        CProcessors.Cast_Data(keys=('mask_array',), dtypes=('int32',)),
         CProcessors.Add_Constant(keys=image_keys,
                                  values=(-mean_value,)),  # Put them on a scale of roughly 0
         CProcessors.MultiplyImagesByConstant(keys=image_keys,
                                              values=(1/standard_deviation_value,)),
-        CProcessors.RandomNoise(wanted_keys=('ct_array',), max_noise=noise),
         CProcessors.Threshold_Images(keys=image_keys,
                                      lower_bounds=(-5,),
                                      upper_bounds=(5,),
@@ -31,7 +40,7 @@ def return_generator(records_path, batch=8):
         CProcessors.ToCategorical(annotation_keys=out_keys, number_of_classes=(2,)),
     ]
     base_processors += [CProcessors.ReturnOutputs(input_keys=pull_keys, output_keys=out_keys, as_tuple=False),]
-    prefetch = 1
+    prefetch = 5
     base_processors += [{'batch': batch}, {'prefetch': prefetch}, ]
     generator.compile_data_set(image_processors=base_processors, debug=False)
     return generator

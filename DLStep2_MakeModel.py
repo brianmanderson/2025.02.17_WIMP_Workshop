@@ -5,7 +5,7 @@ import os
 
 
 def return_model() -> models.Model:
-    inputs = x = layers.Input(shape=[64, 256, 256, 1])
+    inputs = x = layers.Input(shape=[None, None, None, 1])
     conv = layers.Conv3D
     conv_kernel = (3, 3, 3)
     max_pool = layers.MaxPool3D
@@ -46,8 +46,7 @@ def return_model() -> models.Model:
             x = layers.BatchNormalization(name=f"Decoding_BN_{_}_{__}")(x)
             x = layers.Activation("elu", name=f"Decoding_Activation_{_}_{__}")(x)
 
-    x = conv(2, conv_kernel, padding="same",
-             activation='softmax', name="EndConv")(x)
+    x = conv(2, conv_kernel, padding="same", activation='softmax', name="EndConv")(x)
     model = tf.keras.Model(inputs, x)
     return model
 
@@ -59,7 +58,7 @@ def train():
     model = return_model()
 
     records_path = [data_path]
-    train_generator = return_generator(records_path, batch=1)
+    train_generator = return_generator(records_path, batch=5)
 
     tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tensorboard_folder, profile_batch=0,
                                                  write_graph=True)
