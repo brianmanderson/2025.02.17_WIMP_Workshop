@@ -84,7 +84,7 @@ def train():
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    model.fit(train_generator.data_set, epochs=1000, callbacks=callbacks, steps_per_epoch=len(train_generator))
+    model.fit(train_generator.data_set, epochs=10, callbacks=callbacks, steps_per_epoch=len(train_generator))
 
 
 if __name__ == '__main__':
