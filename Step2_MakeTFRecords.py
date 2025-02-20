@@ -40,7 +40,7 @@ def return_processors():
     train_processors += [
         Processors.Box_Images(image_keys=('ct_array', 'mask_array'), annotation_key='mask_array',
                               wanted_vals_for_bbox=[1], bounding_box_expansion=(10, 20, 20),
-                              power_val_z=64, power_val_c=512, power_val_r=512)
+                              power_val_z=64, power_val_c=256, power_val_r=256)
     ]
     """
     Distribute into 3D images. This is for a 3D UNet, you can also distribute into 2D which will make lots of 2D images

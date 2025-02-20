@@ -11,9 +11,9 @@ def return_generator(records_path, batch=8):
                                    debug=False, repeat=True,
                                    shuffle=True,
                                    in_parallel=2, delete_old_cache=True)
-    mean_value = 0
+    mean_value = -35
     noise = 0.0
-    standard_deviation_value = 1
+    standard_deviation_value = 60
     image_keys = ('ct_array',)
     out_keys = ('mask_array',)
     pull_keys = image_keys
@@ -25,13 +25,13 @@ def return_generator(records_path, batch=8):
                                              values=(1/standard_deviation_value,)),
         CProcessors.RandomNoise(wanted_keys=('ct_array',), max_noise=noise),
         CProcessors.Threshold_Images(keys=image_keys,
-                                     lower_bounds=(-300,),
-                                     upper_bounds=(300,),
+                                     lower_bounds=(-5,),
+                                     upper_bounds=(5,),
                                      divides=(False,)),
         CProcessors.ToCategorical(annotation_keys=out_keys, number_of_classes=(2,)),
     ]
     base_processors += [CProcessors.ReturnOutputs(input_keys=pull_keys, output_keys=out_keys, as_tuple=False),]
-    prefetch = 15
+    prefetch = 1
     base_processors += [{'batch': batch}, {'prefetch': prefetch}, ]
     generator.compile_data_set(image_processors=base_processors, debug=False)
     return generator
