@@ -1,4 +1,5 @@
 import numpy as np
+from Tools import return_file_paths
 import os
 from TFDataSets.TFGenerator import DataGeneratorClass
 from TFDataSets import ConstantProcessors as CProcessors
@@ -6,7 +7,7 @@ from PlotScrollNumpyArrays.Plot_Scroll_Images import plot_scroll_Image
 import SimpleITK as sitk
 
 
-def return_generator(records_path, batch=8):
+def return_generator(records_path, batch=8, out_shape=(32, 128, 128)):
     generator = DataGeneratorClass(record_paths=records_path,
                                    debug=False, repeat=True,
                                    shuffle=True,
@@ -14,7 +15,6 @@ def return_generator(records_path, batch=8):
     mean_value = -35
     standard_deviation_value = 60
     image_shape = (64, 256, 256)
-    out_shape = (32, 128, 128)
     image_keys = ('ct_array',)
     out_keys = ('mask_array',)
     pull_keys = image_keys
@@ -48,15 +48,18 @@ def return_generator(records_path, batch=8):
 
 def main():
     print("Getting records for train")
-    records_path = [os.path.join(os.path.join('.', 'Data', 'TFRecords'))]
+    _, tf_records_path, _ = return_file_paths()
+    records_path = [tf_records_path]
     train_generator = return_generator(records_path, batch=1)
     train_dataset = train_generator.data_set
     iterator = iter(train_dataset)
     for _ in range(len(train_generator)):
         # print(_)
         x, y = next(iterator)
-        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(x.numpy())), os.path.join('.', 'Data', 'TFRecords', 'Image.nii.gz'))
-        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(y[..., 1].numpy()).astype('float')), os.path.join('.', 'Data', 'TFRecords', 'Mask.nii.gz'))
+        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(x.numpy())),
+                        os.path.join(tf_records_path, 'Image.nii.gz'))
+        sitk.WriteImage(sitk.GetImageFromArray(np.squeeze(y[..., 1].numpy()).astype('float')),
+                        os.path.join(tf_records_path, 'Mask.nii.gz'))
         break
 
 

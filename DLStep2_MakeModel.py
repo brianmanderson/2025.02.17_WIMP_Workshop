@@ -1,4 +1,5 @@
 import tensorflow as tf
+from Tools import return_file_paths
 from tensorflow.keras import layers, models
 from DLStep1_DataGenerators import return_generator
 import os
@@ -52,17 +53,16 @@ def return_model() -> models.Model:
 
 
 def train():
-    data_path = os.path.join('.', 'Data', 'TFRecords')
-    tensorboard_folder = os.path.join('.', 'Data', 'Tensorboard')
+    _, tf_records_path, tensorboard_path = return_file_paths()
     session_num = 1
     model = return_model()
 
-    records_path = [data_path]
-    train_generator = return_generator(records_path, batch=5)
+    records_path = [tf_records_path]
+    train_generator = return_generator(records_path, batch=5, out_shape=(32, 128, 128))
 
-    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tensorboard_folder, profile_batch=0,
+    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tensorboard_path, profile_batch=0,
                                                  write_graph=True)
-    checkpoint_path = os.path.join(tensorboard_folder, "checkpoint", f"Session_{session_num}/cp.weights.h5")
+    checkpoint_path = os.path.join(tensorboard_path, "checkpoint", f"Session_{session_num}/cp.weights.h5")
 
     # Create a callback that saves the model's weights
     monitor_save = "loss"  # "val_loss"
@@ -84,7 +84,7 @@ def train():
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    model.fit(train_generator.data_set, epochs=10, callbacks=callbacks, steps_per_epoch=len(train_generator))
+    model.fit(train_generator.data_set, epochs=100, callbacks=callbacks, steps_per_epoch=len(train_generator))
 
 
 if __name__ == '__main__':
